@@ -1,25 +1,35 @@
 import os
 import json
+import streamlit as st
 from typing import Optional
-from dotenv import load_dotenv
 
-load_dotenv()
 
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini")
+def get_secret(key: str, default=None):
+    """Get secret from Streamlit secrets (cloud) or environment (local)."""
+    try:
+        value = st.secrets.get(key)
+        if value:
+            return value
+    except Exception:
+        pass
+    return os.getenv(key, default)
+
+
+LLM_PROVIDER = get_secret("LLM_PROVIDER", "gemini")
 
 
 def get_llm_client():
     """Get the appropriate LLM client based on configuration."""
     if LLM_PROVIDER == "openai":
         from openai import OpenAI
-        return OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        return OpenAI(api_key=get_secret("OPENAI_API_KEY"))
     elif LLM_PROVIDER == "anthropic":
         import anthropic
-        return anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+        return anthropic.Anthropic(api_key=get_secret("ANTHROPIC_API_KEY"))
     else:
         # Gemini (default)
         import google.generativeai as genai
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+        genai.configure(api_key=get_secret("GEMINI_API_KEY"))
         return genai
 
 

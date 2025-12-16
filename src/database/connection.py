@@ -1,18 +1,27 @@
 import os
+import streamlit as st
 from supabase import create_client, Client
-from dotenv import load_dotenv
 
-load_dotenv()
+
+def get_secret(key: str, default=None):
+    """Get secret from Streamlit secrets (cloud) or environment (local)."""
+    try:
+        value = st.secrets.get(key)
+        if value:
+            return value
+    except Exception:
+        pass
+    return os.getenv(key, default)
 
 
 def get_supabase_client() -> Client:
     """Get a Supabase client instance."""
-    url = os.getenv("SUPABASE_URL")
-    key = os.getenv("SUPABASE_KEY")
+    url = get_secret("SUPABASE_URL")
+    key = get_secret("SUPABASE_KEY")
 
     if not url or not key:
         raise ValueError(
-            "SUPABASE_URL and SUPABASE_KEY must be set in environment variables"
+            "SUPABASE_URL and SUPABASE_KEY must be set in secrets or environment variables"
         )
 
     return create_client(url, key)
