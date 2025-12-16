@@ -100,7 +100,8 @@ def render_workout_card(workout: dict, db: DatabaseManager):
     st.divider()
 
     # Get AI guidance
-    if st.button("Get AI Guidance", key=f"guidance_{workout_id}"):
+    guidance_key = f"guidance_result_{workout_id}"
+    if st.button("Get AI Guidance", key=f"guidance_btn_{workout_id}"):
         with st.spinner("Getting personalized guidance..."):
             try:
                 workout_data = {
@@ -120,13 +121,13 @@ def render_workout_card(workout: dict, db: DatabaseManager):
                     ],
                 }
                 guidance = get_workout_guidance(workout_data)
-                st.session_state[f"guidance_{workout_id}"] = guidance
+                st.session_state[guidance_key] = guidance
             except Exception as e:
                 st.error(f"Error getting guidance: {str(e)}")
 
-    if f"guidance_{workout_id}" in st.session_state:
+    if guidance_key in st.session_state:
         with st.expander("AI Workout Guidance", expanded=True):
-            st.markdown(st.session_state[f"guidance_{workout_id}"])
+            st.markdown(st.session_state[guidance_key])
 
     # Exercise list
     st.subheader("Exercises")
